@@ -7,8 +7,11 @@ import Feed from './components/Feed'
 import { Routes, Route } from 'react-router-dom'
 import Users from './components/Users'
 import UserPage from './components/UserPage'
-import './App.css'
+import Login from './components/Login'
+import Signup from './components/Signup'
 import HomePage from './components/HomePage'
+import NewPost from './components/NewPost'
+import './App.css'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -21,7 +24,10 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/users" element={<Users />} />
-          
+          <Route path="/user-posts/:username" element={<UserPage />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/new-post" element={<NewPost />} />
         </Routes>
       </section>
 

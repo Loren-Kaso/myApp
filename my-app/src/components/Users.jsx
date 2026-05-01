@@ -14,13 +14,17 @@ import {
   TableRow,
   TextField,
 } from '@mui/material'
+import { Link } from 'react-router-dom'
 import { fetchUsers } from '../api'
 
 const UsersPage = () => {
   const [users, setUsers] = useState([])
   const [searchText, setSearchText] = useState('')
   const [activeSearch, setActiveSearch] = useState('')
+  const [nextPage, setNextPage] = useState(1)
+  const [hasMoreUsers, setHasMoreUsers] = useState(true)
   const [isLoading, setIsLoading] = useState(true)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
   const [error, setError] = useState('')
 
   useEffect(() => {
@@ -38,7 +42,9 @@ const UsersPage = () => {
 
       try {
         const usersData = await fetchUsers(1, 10, activeSearch)
-        setUsers(usersData)
+        setUsers(usersData.users)
+        setNextPage(usersData.nextPage)
+        setHasMoreUsers(usersData.hasMoreUsers)
       } catch (err) {
         setError(err.message)
       } finally {
@@ -48,6 +54,29 @@ const UsersPage = () => {
 
     loadUsers()
   }, [activeSearch])
+
+  async function handleLoadMore() {
+    setIsLoadingMore(true)
+    setError('')
+
+    try {
+      const existingUsernames = users.map((user) => user.username)
+      const usersData = await fetchUsers(
+        nextPage,
+        10,
+        activeSearch,
+        existingUsernames,
+      )
+
+      setUsers((currentUsers) => [...currentUsers, ...usersData.users])
+      setNextPage(usersData.nextPage)
+      setHasMoreUsers(usersData.hasMoreUsers)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setIsLoadingMore(false)
+    }
+  }
 
   return (
     <Box>
@@ -98,50 +127,76 @@ const UsersPage = () => {
 
       {error && <Alert severity="error">{error}</Alert>}
 
-      {!isLoading && !error && (
-        <TableContainer
-          component={Paper}
-          sx={{
-            border: '1px solid #d9dce3',
-            boxShadow: '0 3px 10px rgba(30, 41, 59, 0.10)',
-          }}
-        >
-          <Table>
-            <TableHead>
-              <TableRow sx={{ backgroundColor: '#f3f4f6' }}>
-                <TableCell sx={{ fontWeight: 700 }}>Email</TableCell>
-                <TableCell align="center" sx={{ fontWeight: 700 }}>
-                  Posts
-                </TableCell>
-                <TableCell align="center" sx={{ fontWeight: 700 }}>
-                  Action
-                </TableCell>
-              </TableRow>
-            </TableHead>
-
-            <TableBody>
-              {users.map((user) => (
-                <TableRow key={user.username}>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell align="center">{user.postsCount}</TableCell>
-                  <TableCell align="center">
-                    <Button
-                      variant="contained"
-                      size="small"
-                      sx={{
-                        borderRadius: 999,
-                        textTransform: 'none',
-                        backgroundColor: '#6366f1',
-                      }}
-                    >
-                      See Posts
-                    </Button>
+      {!isLoading && users.length > 0 && (
+        <>
+          <TableContainer
+            component={Paper}
+            sx={{
+              border: '1px solid #d9dce3',
+              boxShadow: '0 3px 10px rgba(30, 41, 59, 0.10)',
+            }}
+          >
+            <Table>
+              <TableHead>
+                <TableRow sx={{ backgroundColor: '#f3f4f6' }}>
+                  <TableCell sx={{ fontWeight: 700 }}>Email</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 700 }}>
+                    Posts
+                  </TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 700 }}>
+                    Action
                   </TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+              </TableHead>
+
+              <TableBody>
+                {users.map((user) => (
+                  <TableRow key={user.username}>
+                    <TableCell>{user.email}</TableCell>
+                    <TableCell align="center">{user.postsCount}</TableCell>
+                    <TableCell align="center">
+                      <Button
+                        component={Link}
+                        to={`/user-posts/${user.username}`}
+                        variant="contained"
+                        size="small"
+                        sx={{
+                          borderRadius: 999,
+                          textTransform: 'none',
+                          backgroundColor: '#6366f1',
+                        }}
+                      >
+                        See Posts
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+
+          {hasMoreUsers && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+              <Button
+                variant="contained"
+                onClick={handleLoadMore}
+                disabled={isLoadingMore}
+                sx={{
+                  borderRadius: 999,
+                  px: 4,
+                  textTransform: 'none',
+                  backgroundColor: '#6366f1',
+                }}
+              >
+                {isLoadingMore ? (
+                  <CircularProgress color="inherit" size={22} />
+                ) : (
+                  'Load More'
+                )}
+              </Button>
+            </Box>
+          )}
+        </>
       )}
     </Box>
   )

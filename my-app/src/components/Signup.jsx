@@ -3,16 +3,17 @@ import { Link as RouterLink } from 'react-router-dom'
 import {
   Box,
   Button,
-  Divider,
+  Link,
   Paper,
   Stack,
   TextField,
   Typography,
 } from '@mui/material'
 
-const LoginPage = () => {
+const SignupPage = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [repeatPassword, setRepeatPassword] = useState('')
 
   function handleSubmit(event) {
     event.preventDefault()
@@ -49,10 +50,10 @@ const LoginPage = () => {
               component="h1"
               sx={{ color: '#1f2937', fontWeight: 800, mb: 0.75 }}
             >
-              Login
+              Create Account
             </Typography>
             <Typography variant="body2" sx={{ color: '#94a3b8' }}>
-              Sign in to your account
+              Sign up for a new account
             </Typography>
           </Box>
 
@@ -72,9 +73,20 @@ const LoginPage = () => {
             name="password"
             type="password"
             placeholder="********"
-            autoComplete="current-password"
+            autoComplete="new-password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
+            fullWidth
+          />
+
+          <TextField
+            label="Repeat Password"
+            name="repeatPassword"
+            type="password"
+            placeholder="********"
+            autoComplete="new-password"
+            value={repeatPassword}
+            onChange={(event) => setRepeatPassword(event.target.value)}
             fullWidth
           />
 
@@ -91,34 +103,26 @@ const LoginPage = () => {
               backgroundColor: '#6366f1',
             }}
           >
-            Login
-          </Button>
-
-          <Divider sx={{ color: '#94a3b8', fontWeight: 700, py: 1 }}>
-            OR
-          </Divider>
-
-          <Button
-            component={RouterLink}
-            to="/signup"
-            variant="outlined"
-            size="large"
-            sx={{
-              py: 1.4,
-              borderRadius: 2,
-              borderWidth: 2,
-              textTransform: 'none',
-              fontWeight: 800,
-              color: '#6366f1',
-              borderColor: '#6366f1',
-            }}
-          >
             Sign Up
           </Button>
+
+          <Box sx={{ textAlign: 'center', pt: 1 }}>
+            <Typography variant="body2" sx={{ color: '#94a3b8', mb: 0.75 }}>
+              Already have an account?
+            </Typography>
+            <Link
+              component={RouterLink}
+              to="/login"
+              underline="none"
+              sx={{ color: '#6366f1', fontWeight: 700 }}
+            >
+              Login
+            </Link>
+          </Box>
         </Stack>
       </Paper>
     </Box>
   )
 }
 
-export default LoginPage
+export default SignupPage
